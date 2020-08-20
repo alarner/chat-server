@@ -14,10 +14,10 @@ app.get("/", (req, res) => {
 
 app.post("/message", (req, res) => {
   if (!req.body.user) {
-    res.status(400).json({ error: "Missing user" });
+    return res.status(400).json({ error: "Missing user" });
   }
   if (!req.body.message) {
-    res.status(400).json({ error: "Missing message" });
+    return res.status(400).json({ error: "Missing message" });
   }
   const message = {
     id: nextId++,
