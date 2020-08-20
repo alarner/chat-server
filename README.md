@@ -5,7 +5,7 @@ authentication. This is purely for educational purposes.
 
 The server uses JSON to send and receive information.
 
-You may use the following URL to test the API: `http://chat.codefriends.larner.com`.
+You may use the following URL to access the API: `http://chat.codefriends.larner.com`.
 
 ## Endpoints
 
