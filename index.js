@@ -10,8 +10,6 @@ app.use(cors());
 app.use(bodyParser.json());
 
 let messages = [];
-let reactions = [];
-let usersReactions = [];
 
 app.get("/", (req, res) => {
   res.send("Hello World!");
@@ -29,6 +27,7 @@ app.post("/message", (req, res) => {
     user: req.body.user,
     message: req.body.message,
     createdAt: new Date(),
+    reactions: [],
   };
   messages.push(message);
   res.json(message);
@@ -42,40 +41,29 @@ app.post("/message/:id/reaction", (req, res) => {
     return res.status(400).json({ error: "Missing reaction" });
   }
   // handling duplicate user reactions
+  const userReaction = req.body.reaction;
+  const user = req.body.user;
+  const messageId = parseInt(req.params.id);
+  const index = messages.findIndex((e) => {
+    return e.id === messageId;
+  });
   function compareReactions(e) {
-    const userReaction = req.body.reaction;
-    const user = req.body.user;
-    const messageId = parseInt(req.params.id);
-    if (
-      e.user === user &&
-      e.reaction === userReaction &&
-      e.messageId === messageId
-    ) {
+    if (e.user === user && e.reaction === userReaction) {
       return true;
     }
   }
-  if (reactions.some(compareReactions)) {
+  if (messages[index].reactions.some(compareReactions)) {
     res.status(400).json({ error: " Duplicate reaction" });
   } else {
     const reaction = {
       id: reactionNextId++,
-      messageId: parseInt(req.params.id),
-      user: req.body.user,
-      reaction: req.body.reaction,
+      user: user,
+      reaction: userReaction,
       createdAt: new Date(),
     };
-    reactions.push(reaction);
+    messages[index].reactions.push(reaction);
     res.json(reaction);
   }
-});
-
-app.get("/message/:id/reactions", (req, res) => {
-  const mId = parseInt(req.params.id);
-  function messageUserReactions(e) {
-    return e.messageId === mId;
-  }
-  let messageReactions = reactions.filter(messageUserReactions);
-  res.json(messageReactions);
 });
 
 app.get("/messages", (req, res) => {
@@ -83,20 +71,26 @@ app.get("/messages", (req, res) => {
   if (parseInt(afterId) != afterId) {
     res.status(400).json({ error: "Invalid afterId" });
   }
-  res.json(messages.slice(afterId));
+  const index = messages.findIndex((e) => {
+    return e.id === parseInt(afterId);
+  });
+  res.json(messages.slice(index + 1));
 });
 
 app.put("/message/:id", (req, res) => {
-  if (!messages[req.params.id - 1]) {
+  const index = messages.findIndex((e) => {
+    return e.id === parseInt(req.params.id);
+  });
+  if (!messages[index]) {
     return res.status(404).json({ error: "Unknown item" });
   }
   if (req.body.message) {
-    messages[req.params.id - 1].message = req.body.message;
+    messages[index].message = req.body.message;
   }
   if (req.body.user) {
-    messages[req.params.id - 1].user = req.body.user;
+    messages[index].user = req.body.user;
   }
-  res.json(messages[req.params.id - 1]);
+  res.json(messages[index]);
 });
 
 app.delete("/message/:id", (req, res) => {
