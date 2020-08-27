@@ -100,14 +100,13 @@ app.put("/message/:id", (req, res) => {
 });
 
 app.delete("/message/:id", (req, res) => {
-  // doesn't work
-  if (!messages[req.params.id - 1]) {
+  const index = messages.findIndex((e) => {
+    return e.id === parseInt(req.params.id);
+  });
+  if (index === -1) {
     return res.status(404).json({ error: "Unknown item" });
   }
-  const index = messages.indexOf(req.body.message);
-  if (req.body.message) {
-    messages.splice(index, 1);
-  }
+  messages.splice(index, 1);
   res.json({ message: "message deleted" });
 });
 
